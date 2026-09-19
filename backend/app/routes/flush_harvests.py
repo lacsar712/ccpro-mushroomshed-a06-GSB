@@ -6,6 +6,7 @@ from app.database import SessionLocal
 from app.models.flush_harvest import FlushHarvest
 from app.models.room import Room
 from app.schemas.flush_harvest import FlushHarvestCreateSchema, FlushHarvestOutSchema
+from app.services import spawn as spawn_service
 from app.utils import validation_error_response
 
 bp = Blueprint("flush_harvests", __name__, url_prefix="/api/flush-harvests")
@@ -42,6 +43,26 @@ def create_flush_harvest():
         room = db.query(Room).filter(Room.id == data["room_id"]).first()
         if not room:
             return jsonify({"detail": "出菇室不存在"}), 400
+
+        # 与关窗共用同一套已接种 room 判定：
+        # room 在某已 closed 的接种窗中接种过 → 禁止新建采收
+        blocked_window = spawn_service.closed_window_blocking_harvest(db, data["room_id"])
+        if blocked_window:
+            return (
+                jsonify(
+                    {
+                        "detail": (
+                            f"该出菇室已在关闭的扩培接种窗 #{blocked_window.id} 中接种，"
+                            "禁止新建采收记录"
+                        ),
+                        "windowId": blocked_window.id,
+                        "windowStatus": blocked_window.status,
+                        "roomId": data["room_id"],
+                    }
+                ),
+                409,
+            )
+
         item = FlushHarvest(
             room_id=data["room_id"],
             harvested_at=data["harvested_at"],

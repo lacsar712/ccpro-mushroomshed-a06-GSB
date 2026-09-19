@@ -18,7 +18,7 @@ class ClimateLogOutSchema(Schema):
     id = fields.Int(dump_only=True)
     room_id = fields.Int(data_key="roomId")
     recorded_at = fields.DateTime(data_key="recordedAt")
-    temp_c = fields.Float(data_key="tempC")
+    temp_c = fields.Float(allow_none=True, data_key="tempC")
     humidity_pct = fields.Int(data_key="humidityPct")
     co2_ppm = fields.Float(allow_none=True, data_key="co2Ppm")
     notes = fields.Str(allow_none=True)

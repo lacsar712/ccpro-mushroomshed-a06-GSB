@@ -7,6 +7,7 @@ const links = [
   { href: '/sheds', label: '菇房' },
   { href: '/rooms', label: '出菇室' },
   { href: '/climate-logs', label: '环境记录' },
+  { href: '/spawn-windows', label: '扩培窗' },
   { href: '/flush-harvests', label: '采收记录' },
 ]
 

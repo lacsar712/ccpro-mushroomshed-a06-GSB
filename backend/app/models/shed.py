@@ -17,3 +17,6 @@ class Shed(Base):
     rooms: Mapped[List["Room"]] = relationship(
         "Room", back_populates="shed", cascade="all, delete-orphan"
     )
+    spawn_windows: Mapped[List["SpawnWindow"]] = relationship(
+        "SpawnWindow", back_populates="shed", cascade="all, delete-orphan"
+    )

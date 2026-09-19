@@ -8,6 +8,7 @@ import Sheds from './pages/Sheds'
 import Rooms from './pages/Rooms'
 import ClimateLogs from './pages/ClimateLogs'
 import FlushHarvests from './pages/FlushHarvests'
+import SpawnWindows from './pages/SpawnWindows'
 
 function AuthedLayout(props: ParentProps): JSX.Element {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/sheds" component={Sheds} />
         <Route path="/rooms" component={Rooms} />
         <Route path="/climate-logs" component={ClimateLogs} />
+        <Route path="/spawn-windows" component={SpawnWindows} />
         <Route path="/flush-harvests" component={FlushHarvests} />
       </Route>
       <Route path="*404" component={() => <Navigate href="/" />} />

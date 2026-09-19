@@ -294,6 +294,52 @@ th {
   color: var(--mushroom-brown);
 }
 
+.badge.window-open {
+  background: #dceee0;
+  color: #2a6b3f;
+}
+
+.badge.window-closed {
+  background: #ede8e4;
+  color: var(--mushroom-brown);
+}
+
+.section-title {
+  margin: 28px 0 12px;
+  font-size: 18px;
+  color: var(--forest-deep);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-filter {
+  width: auto;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.inline-link {
+  color: var(--forest-mid);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  color: var(--forest-deep);
+}
+
+.error.conflict {
+  background: #fdecea;
+  border-color: #e0b4ae;
+  color: #8a2f25;
+}
+
+.over-cap {
+  color: #b3402f;
+  font-weight: 600;
+}
+
 .login-page {
   min-height: 100vh;
   display: grid;
