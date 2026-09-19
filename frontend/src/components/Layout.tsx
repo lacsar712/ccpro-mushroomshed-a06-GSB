@@ -8,6 +8,7 @@ const links = [
   { href: '/rooms', label: '出菇室' },
   { href: '/climate-logs', label: '环境记录' },
   { href: '/flush-harvests', label: '采收记录' },
+  { href: '/spawn-windows', label: '扩培窗' },
 ]
 
 export default function Layout(props: ParentProps) {

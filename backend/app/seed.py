@@ -6,7 +6,14 @@ from app.models.climate_log import ClimateLog
 from app.models.flush_harvest import FlushHarvest
 from app.models.room import Room
 from app.models.shed import Shed
+from app.models.spawn_inoculation import SpawnInoculation
+from app.models.spawn_window import SpawnWindow
 from app.models.user import User
+from app.services.spawn_rules import (
+    DEFAULT_INOC_HUMIDITY_PCT,
+    DEFAULT_INOC_TEMP_C,
+    INOC_CLIMATE_NOTE,
+)
 
 
 def seed() -> None:
@@ -134,6 +141,65 @@ def seed() -> None:
                         weight_kg=55.2,
                         grade="A",
                         operator_name="出菇员",
+                    ),
+                ]
+            )
+
+            # --- 扩培接种窗：含两条立即可复现的失败路径 ---
+            # 1) s1 一扇已关闭的窗，R-02 在其中接种 600/800 → 对 R-02 新建采收必 409
+            w_closed = SpawnWindow(
+                shed_id=s1.id,
+                opened_at=now - timedelta(days=10),
+                closed_at=now - timedelta(days=7),
+                status="closed",
+                cap_bags=800,
+            )
+            # 2) s2 一扇开启中的窗，V-02 已累计 700/1000 → 再接种 400 袋必 409（剩 300）
+            w_open = SpawnWindow(
+                shed_id=s2.id,
+                opened_at=now - timedelta(days=5),
+                closed_at=None,
+                status="open",
+                cap_bags=1000,
+            )
+            db.add_all([w_closed, w_open])
+            db.flush()
+
+            inoc_closed = SpawnInoculation(
+                window_id=w_closed.id,
+                room_id=r2.id,
+                bag_count=600,
+                inoculated_at=now - timedelta(days=9),
+                operator_name="场长",
+            )
+            inoc_open = SpawnInoculation(
+                window_id=w_open.id,
+                room_id=r4.id,
+                bag_count=700,
+                inoculated_at=now - timedelta(days=3),
+                operator_name="出菇员",
+            )
+            db.add_all([inoc_closed, inoc_open])
+            db.flush()
+
+            # 每次接种同事务落一条该 room 的环境邻域（默认湿度 90% / 温度 20°C）
+            db.add_all(
+                [
+                    ClimateLog(
+                        room_id=r2.id,
+                        recorded_at=now - timedelta(days=9),
+                        temp_c=DEFAULT_INOC_TEMP_C,
+                        humidity_pct=DEFAULT_INOC_HUMIDITY_PCT,
+                        co2_ppm=None,
+                        notes=INOC_CLIMATE_NOTE,
+                    ),
+                    ClimateLog(
+                        room_id=r4.id,
+                        recorded_at=now - timedelta(days=3),
+                        temp_c=DEFAULT_INOC_TEMP_C,
+                        humidity_pct=DEFAULT_INOC_HUMIDITY_PCT,
+                        co2_ppm=None,
+                        notes=INOC_CLIMATE_NOTE,
                     ),
                 ]
             )

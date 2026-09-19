@@ -1,5 +1,6 @@
 import { createSignal, onMount } from 'solid-js'
-import { For } from 'solid-js'
+import { For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { api } from '../api/client'
 import type { ClimateLog, Room } from '../types'
 
@@ -21,7 +22,9 @@ const empty = {
 export default function ClimateLogs() {
   const [rows, setRows] = createSignal<ClimateLog[]>([])
   const [rooms, setRooms] = createSignal<Room[]>([])
-  const [form, setForm] = createSignal({ ...empty })
+  const [params] = useSearchParams<{ roomId?: string }>()
+  const roomFilter = () => (params.roomId ? Number(params.roomId) : null)
+  const [form, setForm] = createSignal({ ...empty, roomId: params.roomId ?? '' })
   const [error, setError] = createSignal('')
 
   async function load() {
@@ -69,6 +72,11 @@ export default function ClimateLogs() {
     }
   }
 
+  const visibleRows = () => {
+    const rid = roomFilter()
+    return rid ? rows().filter((l) => l.roomId === rid) : rows()
+  }
+
   return (
     <div>
       <header class="page-header">
@@ -76,6 +84,19 @@ export default function ClimateLogs() {
         <p class="muted">温湿度与 CO₂；湿度须 1–100</p>
       </header>
       {error() && <div class="error">{error()}</div>}
+
+      <Show when={roomFilter()}>
+        <div class="panel" style={{ display: 'flex', 'align-items': 'center', gap: '12px' }}>
+          <span>
+            仅显示出菇室{' '}
+            <strong>
+              {rooms().find((r) => r.id === roomFilter())?.roomCode}
+            </strong>{' '}
+            的环境记录（含扩培接种自动写入的邻域记录）
+          </span>
+          <a class="btn ghost" href="/climate-logs">清除筛选</a>
+        </div>
+      </Show>
 
       <form class="panel form-grid" onSubmit={onSubmit}>
         <label>
@@ -161,7 +182,7 @@ export default function ClimateLogs() {
             </tr>
           </thead>
           <tbody>
-            <For each={rows()}>
+            <For each={visibleRows()}>
               {(r) => (
                 <tr>
                   <td>{r.id}</td>

@@ -1,5 +1,6 @@
 export type RoomStatus = 'fruiting' | 'idle' | 'sanitize'
 export type HarvestGrade = 'A' | 'B' | 'C'
+export type SpawnWindowStatus = 'open' | 'closed'
 
 export interface Shed {
   id: number
@@ -15,6 +16,27 @@ export interface Room {
   species: string
   capacityBags: number
   status: RoomStatus
+}
+
+export interface SpawnWindow {
+  id: number
+  shedId: number
+  openedAt: string
+  closedAt?: string | null
+  status: SpawnWindowStatus
+  capBags: number
+  usedBags: number
+  lockedRoomIds: number[]
+}
+
+export interface SpawnInoculation {
+  id: number
+  windowId: number
+  roomId: number
+  bagCount: number
+  inoculatedAt: string
+  operatorName: string
+  climateLogId?: number | null
 }
 
 export interface ClimateLog {

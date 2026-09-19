@@ -294,6 +294,31 @@ th {
   color: var(--mushroom-brown);
 }
 
+.badge.open {
+  background: #dceee0;
+  color: #2a6b3f;
+}
+
+.badge.closed {
+  background: #ede8e4;
+  color: var(--mushroom-brown);
+}
+
+.cap-bar {
+  margin-top: 4px;
+  width: 120px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--spore-mist);
+  overflow: hidden;
+}
+
+.cap-fill {
+  height: 100%;
+  background: var(--forest-mid);
+  border-radius: 999px;
+}
+
 .login-page {
   min-height: 100vh;
   display: grid;

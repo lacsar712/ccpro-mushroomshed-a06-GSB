@@ -71,7 +71,11 @@ def delete_room(room_id: int):
         if not item:
             return jsonify({"detail": "出菇室不存在"}), 404
         db.delete(item)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            return jsonify({"detail": "该出菇室已有环境/采收/扩培接种记录，无法删除"}), 400
         return "", 204
     finally:
         db.close()

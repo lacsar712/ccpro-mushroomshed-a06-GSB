@@ -1,22 +1,23 @@
 import { createSignal, onMount } from 'solid-js'
-import { For } from 'solid-js'
+import { For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { api } from '../api/client'
 import type { Room, RoomStatus, Shed } from '../types'
 
 const statuses: RoomStatus[] = ['fruiting', 'idle', 'sanitize']
 
-const empty = {
-  shedId: '',
-  roomCode: '',
-  species: '',
-  capacityBags: '',
-  status: 'fruiting' as RoomStatus,
-}
-
 export default function Rooms() {
   const [rows, setRows] = createSignal<Room[]>([])
   const [sheds, setSheds] = createSignal<Shed[]>([])
-  const [form, setForm] = createSignal({ ...empty })
+  const [params] = useSearchParams<{ shedId?: string }>()
+  const shedFilter = () => (params.shedId ? Number(params.shedId) : null)
+  const [form, setForm] = createSignal({
+    shedId: params.shedId ?? '',
+    roomCode: '',
+    species: '',
+    capacityBags: '',
+    status: 'fruiting' as RoomStatus,
+  })
   const [error, setError] = createSignal('')
 
   async function load() {
@@ -32,6 +33,11 @@ export default function Rooms() {
     load().catch((e) => setError(e.message))
   })
 
+  const visibleRows = () => {
+    const sid = shedFilter()
+    return sid ? rows().filter((r) => r.shedId === sid) : rows()
+  }
+
   async function onSubmit(e: Event) {
     e.preventDefault()
     setError('')
@@ -46,7 +52,13 @@ export default function Rooms() {
           status: form().status,
         }),
       })
-      setForm({ ...empty })
+      setForm({
+        shedId: params.shedId ?? '',
+        roomCode: '',
+        species: '',
+        capacityBags: '',
+        status: 'fruiting',
+      })
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : '保存失败')
@@ -74,6 +86,15 @@ export default function Rooms() {
         <p class="muted">菌种、袋数容量与房态</p>
       </header>
       {error() && <div class="error">{error()}</div>}
+
+      <Show when={shedFilter()}>
+        <div class="panel" style={{ display: 'flex', 'align-items': 'center', gap: '12px' }}>
+          <span>
+            仅显示菇房 <strong>{sheds().find((s) => s.id === shedFilter())?.name}</strong> 的出菇室
+          </span>
+          <a class="btn ghost" href="/rooms">清除筛选</a>
+        </div>
+      </Show>
 
       <form class="panel form-grid" onSubmit={onSubmit}>
         <label>
@@ -145,11 +166,15 @@ export default function Rooms() {
             </tr>
           </thead>
           <tbody>
-            <For each={rows()}>
+            <For each={visibleRows()}>
               {(r) => (
                 <tr>
                   <td>{r.id}</td>
-                  <td>{r.shedId}</td>
+                  <td>
+                    <a class="nav-link" href={`/spawn-windows?shedId=${r.shedId}`}>
+                      {sheds().find((s) => s.id === r.shedId)?.name ?? `菇房 #${r.shedId}`}
+                    </a>
+                  </td>
                   <td>{r.roomCode}</td>
                   <td>{r.species}</td>
                   <td>{r.capacityBags}</td>
